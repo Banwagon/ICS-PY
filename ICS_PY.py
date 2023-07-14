@@ -381,101 +381,111 @@ def send_coil_value():
 def send_coils_values():
   global unitId, coil
   coil_length = ''
-  while True:
-    if int(len(coil_length))>10:
-      coil_length = ''
-      information_spash()
-      print()
-      print(CyanAscii+48*'-'+ResetColor)
-      print()
-      print('Coil length exceeds '+YellowAscii+'10'+ResetColor+' bits in length.')
-      print()
-      input('Press enter to continue...')
-      print()  
-    if int(len(coil_length))==10:
+  try:
+    while True:
+      if int(len(coil_length))>10:
+        coil_length = ''
+        information_spash()
+        print()
+        print(CyanAscii+48*'-'+ResetColor)
+        print()
+        print('Coil length exceeds '+YellowAscii+'10'+ResetColor+' bits in length.')
+        print()
+        input('Press enter to continue...')
+        print()  
+      if int(len(coil_length))==10:
+        information_spash()
+        print()
+        print(CyanAscii+48*'-'+ResetColor)
+        print()
+        print('Coil bits: '+YellowAscii+str(coil_length)+ResetColor)
+        print()
+        coil_max=input('Coil value equals '+YellowAscii+'10'+ResetColor+' bits in length, would you like to ['+CyanAscii+'r'+ResetColor+']eset or ['+CyanAscii+'c'+ResetColor+']ontinue? CTRL+C to break. ')
+        if coil_max!='' and coil_max[0].lower() in ['r']:
+          coil_length = ''
+        if coil_max!='' and coil_max[0].lower() in ['c']:
+          break
       information_spash()
       print()
       print(CyanAscii+48*'-'+ResetColor)
       print()
       print('Coil bits: '+YellowAscii+str(coil_length)+ResetColor)
       print()
-      coil_max=input('Coil value equals '+YellowAscii+'10'+ResetColor+' bits in length, would you like to ['+CyanAscii+'r'+ResetColor+']eset or ['+CyanAscii+'c'+ResetColor+']ontinue? CTRL+C to break. ')
-      if coil_max!='' and coil_max[0].lower() in ['r']:
-        coil_length = ''
-      if coil_max!='' and coil_max[0].lower() in ['c']:
+      coil_number=input('Enter up to a '+YellowAscii+'10'+ResetColor+' bit coil value. Enter ['+YellowAscii+'c'+ResetColor+'] to continue, Ctrl+C to break: ')
+      if coil_number!='' and coil_number[0].lower() in ['c']:
+        client.write_coil(address=int(coil), value=int(coil_value), slave=int(unitId))
+        #print ('Coil value is now '+str(coil_value))
+        #print()
+        #input('Press enter to continue...')
+        #print()
         break
-    information_spash()
-    print()
-    print(CyanAscii+48*'-'+ResetColor)
-    print()
-    print('Coil bits: '+YellowAscii+str(coil_length)+ResetColor)
-    print()
-    coil_number=input('Enter up to a '+YellowAscii+'10'+ResetColor+' bit coil value. Enter ['+YellowAscii+'c'+ResetColor+'] to continue, Ctrl+C to break: ')
-    if coil_number!='' and coil_number[0].lower() in ['c']:
-      client.write_coil(address=int(coil), value=int(coil_value), slave=int(unitId))
-      #print ('Coil value is now '+str(coil_value))
-      #print()
-      #input('Press enter to continue...')
-      #print()
-      break
-    if coil_number!='' and coil_number[0].lower() in ['0', '1']:
-      coil_length += coil_number
-    else:
+      if coil_number!='' and coil_number[0].lower() in ['0', '1']:
+        coil_length += coil_number
+      else:
+        print()
+        print('-Please enter a ['+YellowAscii+'1'+ResetColor+'] or ['+YellowAscii+'0'+ResetColor+']')
+        print()
+        input('Press enter to continue...')
+        print()
+    while True:
+      information_spash()
       print()
-      print('-Please enter a ['+YellowAscii+'1'+ResetColor+'] or ['+YellowAscii+'0'+ResetColor+']')
+      print(CyanAscii+48*'-'+ResetColor)
+      print()
+      client.write_coils(address=int(coil), values=tuple(map(int,coil_length)), slave=int(unitId))
+      print ('Wrote coil value '+YellowAscii+str(coil_length)+ResetColor+' on address ['+LightPurpleAscii+coil+ResetColor+'] to unit ['+CyanAscii+unitId+ResetColor+']')    
       print()
       input('Press enter to continue...')
       print()
-  while True:
-    information_spash()
-    print()
-    print(CyanAscii+48*'-'+ResetColor)
-    print()
-    client.write_coils(address=int(coil), values=tuple(map(int,coil_length)), slave=int(unitId))
-    print ('Wrote coil value '+YellowAscii+str(coil_length)+ResetColor+' on address ['+LightPurpleAscii+coil+ResetColor+'] to unit ['+CyanAscii+unitId+ResetColor+']')    
-    print()
-    input('Press enter to continue...')
-    print()
-    break  
+      break
+  except KeyboardInterrupt:
+    pass  
   client.close
 #
 ## Flood all Servers with random values
 #
 def send_flood_values():
+  global flood_speed, flood_speed_float, unitId_array
   print()
-  unitId_array = []
-  unitId_array.clear()
-  while True:
-    clear_screen()
-    information_spash()
-    main_menu()
-    print(RedAscii+'WARNING: '+ResetColor)
-    print()
-    continue_flood=input(' This will flood random values registry and coil values for each unit selected. Please enter ['+YellowAscii+'Y'+ResetColor+']es to continue or ['+RedAscii+'N'+ResetColor+']o to break: ')
-    if continue_flood!='' and continue_flood[0].lower() in ['n','o']:
-      break
-    if continue_flood!='' and continue_flood[0].lower() in ['y','e','s']:
-      while True:
-        information_spash()
-        print()
-        print(RedAscii+48*'-'+ResetColor)
-        print()
-        print('Current Array: '+str(unitId_array))
-        print()
-        unitId_number=input('Enter the unit numbers ('+YellowAscii+'one at a time'+ResetColor+') of the server devices you would like to flood. Enter ['+YellowAscii+'f'+ResetColor+'] to begin flood, Ctrl+C to break: ')
-        if unitId_number!='' and unitId_number[0].lower() in ['f']:          
+  try:
+    unitId_array = []
+    unitId_array.clear()
+    while True:
+      clear_screen()
+      information_spash()
+      main_menu()
+      print(RedAscii+'WARNING: '+ResetColor)
+      print()
+      continue_flood=input(' This will flood random values registry and coil values for each unit selected. Please enter ['+YellowAscii+'Y'+ResetColor+']es to continue or ['+RedAscii+'N'+ResetColor+']o to break: ')
+      if continue_flood!='' and continue_flood[0].lower() in ['n','o']:
+        break
+      if continue_flood!='' and continue_flood[0].lower() in ['y','e','s']:
+        while True:
+          information_spash()
           print()
           print(RedAscii+48*'-'+ResetColor)
           print()
-          break
-        if unitId_number!='' and unitId_number[0].lower() in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
-          unitId_array.append(unitId_number)
+          print('Current Array: '+str(unitId_array))
+          print()
+          unitId_number=input('Enter the unit numbers ('+YellowAscii+'one at a time'+ResetColor+') of the server devices you would like to flood. Enter ['+YellowAscii+'f'+ResetColor+'] to begin flood, Ctrl+C to break: ')
+          if unitId_number!='' and unitId_number[0].lower() in ['f']:          
+            break
+          if unitId_number!='' and unitId_number[0].lower() in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            unitId_array.append(unitId_number)   
+        while True:
+          information_spash()
           print()
           print(RedAscii+48*'-'+ResetColor)
           print()
-          print( '-Unit '+YellowAscii+unitId_number+ResetColor+' added to array. '+str(unitId_array))
-          time.sleep(.1)    
-      try:  
+          flood_speed=input('Enter flood speed: ')
+          if flood_speed!='' and flood_speed[0].lower() in ['.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+            break
+          else:
+            print()
+            print('-Please enter a valid number, example: ('+YellowAscii+'1'+ResetColor+') or ('+YellowAscii+'.5'+ResetColor+')')
+            print()
+            input('Press enter to continue...')
+            print() 
         while True:
           coil_random = randint(0,9)
           coil_value_random = randint(0, 1)
@@ -485,18 +495,18 @@ def send_flood_values():
           unitId = unitId_array[unitId_random]
           client.write_register(address=int(registry_random), value=int(registry_value_random), slave=int(unitId))
           client.write_coil(address=int(coil_random), value=int(coil_value_random), slave=int(unitId))
-          time.sleep(1)
+          #time.sleep(1)
+          time.sleep(float(flood_speed))
           print(str('Wrote value of ['+YellowAscii+str(coil_value_random)+ResetColor+']').ljust(29),str('on coil ['+CyanAscii+str(coil_random)+ResetColor+'] of unit number ['+LightPurpleAscii+unitId+ResetColor+']').rjust(54))
           print(str('Wrote value of ['+YellowAscii+str(registry_value_random)+ResetColor+']').ljust(29),str('on register ['+CyanAscii+str(registry_random)+ResetColor+'] of unit number ['+LightPurpleAscii+unitId+ResetColor+']').rjust(54))
-      except KeyboardInterrupt:
-        pass
-      break
-    else:
-      print()
-      print('-Please enter [Yes] or [No]')
-      print()
-      input('Press enter to continue...')
-      print()
+      else:
+        print()
+        print('-Please enter [Yes] or [No]')
+        print()
+        input('Press enter to continue...')
+        print()
+  except KeyboardInterrupt:
+    pass
   client.close
 #
 ## MAIN ##
