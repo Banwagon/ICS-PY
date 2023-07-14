@@ -6,14 +6,6 @@ from pymodbus.client import ModbusTcpClient as ModbusClient
 from pymodbus.exceptions import ConnectionException
 #
 ## Collored Text
-#def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
-#def prGreen(skk): print("\033[92m {}\033[00m" .format(skk))
-#def prYellow(skk): print("\033[93m {}\033[00m" .format(skk))
-#def prLightPurple(skk): print("\033[94m {}\033[00m" .format(skk))
-#def prPurple(skk): print("\033[95m {}\033[00m" .format(skk))
-#def prCyan(skk): print("\033[96m {}\033[00m" .format(skk))
-#def prLightGray(skk): print("\033[97m {}\033[00m" .format(skk))
-#def prBlack(skk): print("\033[98m {}\033[00m" .format(skk))
 RedAscii = "\033[91m"
 GreenAscii = "\033[92m"
 YellowAscii = "\033[93m"
@@ -26,20 +18,15 @@ ResetColor = "\033[00m"
 #
 # Declare Variables #
 #ipv4address = "192.168.1.20" # Standard Use
-ipv4address = "10.0.3.5" # Local IP for debug testing
+ipv4address = "10.0.3.6" # Local IP for debug testing
 port = "502"
-unitId = "0" #unitId = slave number
+unitId = "1" #unitId = slave number
 registry = "0"
 coil = "0"
 registry_value = "0"
 coil_value = "0"
 readmin = 0
 readmax = 16
-address = 'address='+registry
-value = 'value='+registry_value
-slave = 'slave='+unitId
-#
-##
 client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
 #
 ## Clear screan
@@ -75,7 +62,7 @@ def main_menu():
   print('6. Force Off - (write.register='+YellowAscii+'0'+ResetColor+' for '+CyanAscii+'30'+ResetColor+'s)')
   print('7. Write Coil Value ('+RedAscii+'0'+ResetColor+' = Off, '+GreenAscii+'1'+ResetColor+' = On)')
   print('8. Write Multiple Coil Values ('+RedAscii+'0'+ResetColor+' = Off, '+GreenAscii+'1'+ResetColor+' = On)')
-  print('9. Flood Coils and Registers with Random Values')
+  print('9. '+RedAscii+'OPERATION: MISHAP'+ResetColor+' ('+YellowAscii+'Flood Coils and Registers with Random Values'+ResetColor+')')
   print('0. Exit')
   print()
   print(48*'-')
@@ -244,24 +231,31 @@ def set_coil_value():
 ## Set value manual
 def set_value_man():
   global client, registry_value, unitId
+  clear_screen()
   while True:
-    clear_screen()
+    #clear_screen()
     information_spash()
-    registry_value=input('Please enter a value, example - 0 - 100.  Press q to break: ')
+    print()
+    print(RedAscii+48*'-'+ResetColor)
+    print()
+    registry_value=input('Please enter a value, example - '+YellowAscii+'0'+ResetColor+' - '+YellowAscii+'100'+ResetColor+'.  Enter q to break: ')
     if registry_value=='q':
       registry_value='0'
       break
     if registry_value!='' and registry_value[0].lower() in ['-','0','1','2','3','4','5','6','7','8','9']:
       if int(registry_value)>=100:
         registry_value='100'
+        clear_screen()
         print()
-        print('Value cannot be greater than 100')
-        client.write_register(address=int(registry), count=int(registry_value), slave=(unitId))
+        print('Value cannot be greater than '+YellowAscii+'100'+ResetColor)
+        client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
         print()
         input('Press enter to continue...')
       else:
-        client.write_register(address=int(registry), count=int(registry_value), slave=(unitId))
+        client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
         print()
+        print('Wrote value of '+YellowAscii+str(registry_value)+ResetColor+' to registry ['+CyanAscii+registry+ResetColor+']')
+        time.sleep(2)
     else:
       print()
       print('-Entry cannot be blank, must contain a number.  Press q to break')
@@ -273,9 +267,9 @@ def set_value_man():
 def send_value_auto():
   global client, registry_value, registry, unitId
   clear_screen()
-  information_spash()
   timerDelay = 0
   while True:
+    information_spash()
     print()
     print(RedAscii+48*'-'+ResetColor)
     timerDelay=input('\nPlease enter the timer delay in seconds, example - '+YellowAscii+'3'+ResetColor+': ')
@@ -294,7 +288,6 @@ def send_value_auto():
       print()
   try:
     while True:
-      clear_screen()
       random_value = randint(50, 100)
       registry_value = random_value
       client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
@@ -302,15 +295,15 @@ def send_value_auto():
       print()
       print(RedAscii+48*'-'+ResetColor)
       print()
-      print('- Value is now '+YellowAscii+str(random_value)+ResetColor+', Ctrl+C to break.')
+      print('- Wrote value of '+YellowAscii+str(random_value)+ResetColor+' to register ['+CyanAscii+registry+ResetColor+'], Ctrl+C to break.')
       print()
       for i in range(int(timerDelay)):
         time.sleep(1)
         sys.stdout.write(RedAscii+'.'+ResetColor)
         sys.stdout.flush()
-      #time.sleep(int(timerDelay))
   except KeyboardInterrupt:
-    pass  
+    pass
+  clear_screen()
   client.close
 #
 ## Set Force Off
@@ -371,15 +364,13 @@ def discover_registers():
 #
 ## Error State
 def send_coil_value():
-  global coil_value,ipv4address,coil,port
-  #client = ModbusClient(ipv4address, port)
-  #client.connect()
+  global coil_value,ipv4address,coil,port, unitId
   while True:
     q=input('\n'+RedAscii+'WARNING: '+ResetColor+YellowAscii+'Sending a value of 0 to a coil will turn it off and may result in manually reseting the PLC.'+ResetColor+'\n\nPress enter to continue or q to break: \n')
     if q:
       break
     client.write_coil(address=int(coil), value=int(coil_value), slave=int(unitId))
-    print ('Coil value is now '+str(coil_value))
+    print ('Wrote coil value '+YellowAscii+str(coil_value)+ResetColor+' on address ['+LightPurpleAscii+coil+ResetColor+'] to unit ['+CyanAscii+unitId+ResetColor+']')
     print()
     input('Press enter to continue...')
     print()
@@ -388,28 +379,139 @@ def send_coil_value():
 #
 ## Send Multiple Coil Values
 def send_coils_values():
-  print()
+  global unitId, coil
+  coil_length = ''
+  while True:
+    if int(len(coil_length))>10:
+      coil_length = ''
+      information_spash()
+      print()
+      print(CyanAscii+48*'-'+ResetColor)
+      print()
+      print('Coil length exceeds '+YellowAscii+'10'+ResetColor+' bits in length.')
+      print()
+      input('Press enter to continue...')
+      print()  
+    if int(len(coil_length))==10:
+      information_spash()
+      print()
+      print(CyanAscii+48*'-'+ResetColor)
+      print()
+      print('Coil bits: '+YellowAscii+str(coil_length)+ResetColor)
+      print()
+      coil_max=input('Coil value equals '+YellowAscii+'10'+ResetColor+' bits in length, would you like to ['+CyanAscii+'r'+ResetColor+']eset or ['+CyanAscii+'c'+ResetColor+']ontinue? CTRL+C to break. ')
+      if coil_max!='' and coil_max[0].lower() in ['r']:
+        coil_length = ''
+      if coil_max!='' and coil_max[0].lower() in ['c']:
+        break
+    information_spash()
+    print()
+    print(CyanAscii+48*'-'+ResetColor)
+    print()
+    print('Coil bits: '+YellowAscii+str(coil_length)+ResetColor)
+    print()
+    coil_number=input('Enter up to a '+YellowAscii+'10'+ResetColor+' bit coil value. Enter ['+YellowAscii+'c'+ResetColor+'] to continue, Ctrl+C to break: ')
+    if coil_number!='' and coil_number[0].lower() in ['c']:
+      client.write_coil(address=int(coil), value=int(coil_value), slave=int(unitId))
+      #print ('Coil value is now '+str(coil_value))
+      #print()
+      #input('Press enter to continue...')
+      #print()
+      break
+    if coil_number!='' and coil_number[0].lower() in ['0', '1']:
+      coil_length += coil_number
+    else:
+      print()
+      print('-Please enter a ['+YellowAscii+'1'+ResetColor+'] or ['+YellowAscii+'0'+ResetColor+']')
+      print()
+      input('Press enter to continue...')
+      print()
+  while True:
+    information_spash()
+    print()
+    print(CyanAscii+48*'-'+ResetColor)
+    print()
+    client.write_coils(address=int(coil), values=tuple(map(int,coil_length)), slave=int(unitId))
+    print ('Wrote coil value '+YellowAscii+str(coil_length)+ResetColor+' on address ['+LightPurpleAscii+coil+ResetColor+'] to unit ['+CyanAscii+unitId+ResetColor+']')    
+    print()
+    input('Press enter to continue...')
+    print()
+    break  
+  client.close
 #
-## Flood all Servers with values
+## Flood all Servers with random values
 #
 def send_flood_values():
   print()
+  unitId_array = []
+  unitId_array.clear()
+  while True:
+    clear_screen()
+    information_spash()
+    main_menu()
+    print(RedAscii+'WARNING: '+ResetColor)
+    print()
+    continue_flood=input(' This will flood random values registry and coil values for each unit selected. Please enter ['+YellowAscii+'Y'+ResetColor+']es to continue or ['+RedAscii+'N'+ResetColor+']o to break: ')
+    if continue_flood!='' and continue_flood[0].lower() in ['n','o']:
+      break
+    if continue_flood!='' and continue_flood[0].lower() in ['y','e','s']:
+      while True:
+        information_spash()
+        print()
+        print(RedAscii+48*'-'+ResetColor)
+        print()
+        print('Current Array: '+str(unitId_array))
+        print()
+        unitId_number=input('Enter the unit numbers ('+YellowAscii+'one at a time'+ResetColor+') of the server devices you would like to flood. Enter ['+YellowAscii+'f'+ResetColor+'] to begin flood, Ctrl+C to break: ')
+        if unitId_number!='' and unitId_number[0].lower() in ['f']:          
+          print()
+          print(RedAscii+48*'-'+ResetColor)
+          print()
+          break
+        if unitId_number!='' and unitId_number[0].lower() in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+          unitId_array.append(unitId_number)
+          print()
+          print(RedAscii+48*'-'+ResetColor)
+          print()
+          print( '-Unit '+YellowAscii+unitId_number+ResetColor+' added to array. '+str(unitId_array))
+          time.sleep(.1)    
+      try:  
+        while True:
+          coil_random = randint(0,9)
+          coil_value_random = randint(0, 1)
+          registry_random = randint(0, 4)
+          registry_value_random = randint(1, 99)
+          unitId_random = randint(0, (len(unitId_array))-1)
+          unitId = unitId_array[unitId_random]
+          client.write_register(address=int(registry_random), value=int(registry_value_random), slave=int(unitId))
+          client.write_coil(address=int(coil_random), value=int(coil_value_random), slave=int(unitId))
+          time.sleep(1)
+          print(str('Wrote value of ['+YellowAscii+str(coil_value_random)+ResetColor+']').ljust(29),str('on coil ['+CyanAscii+str(coil_random)+ResetColor+'] of unit number ['+LightPurpleAscii+unitId+ResetColor+']').rjust(54))
+          print(str('Wrote value of ['+YellowAscii+str(registry_value_random)+ResetColor+']').ljust(29),str('on register ['+CyanAscii+str(registry_random)+ResetColor+'] of unit number ['+LightPurpleAscii+unitId+ResetColor+']').rjust(54))
+      except KeyboardInterrupt:
+        pass
+      break
+    else:
+      print()
+      print('-Please enter [Yes] or [No]')
+      print()
+      input('Press enter to continue...')
+      print()
+  client.close
 #
 ## MAIN ##
 def main():
   clear_screen()
-  loop=True
-  while loop:
+  while True:
     information_spash()
     main_menu()
-    choice=input('Enter your choice [1-8]: ')
+    choice=input('Enter your choice [1-0]: ')
     #
     # Item 1: Change Variables
     if choice==str(1):     
       #print()
       #print('-Set Variables [IP, registry, port] has been selected')
-      loop2=True
-      while loop2:
+      while True:
         # Clear screan
         clear_screen()
         information_spash()
@@ -464,8 +566,8 @@ def main():
           print()
           #print ('-Now exiting...')
           #print()            
-          loop=False # This will make the while loop to end as not value of loop is set to False
-          clear_screen()
+          #loop=False # This will make the while loop to end as not value of loop is set to False
+          break
         else:
           # Any integer inputs other than values 1-5 we print an error message
           print()
@@ -476,8 +578,8 @@ def main():
     elif choice==str(2):
       print()
       print ('-Run Discovery has been selected')
-      loop3=True
-      while loop3:
+      time.sleep(1.5)
+      while True:
         ## Call Discover Registers
         discover_registers()
         break  
@@ -486,71 +588,88 @@ def main():
     elif choice==str(3):
       print()
       print ('-Manualy Set Value has been selected')
-      loop4=True
-      while loop4:
+      time.sleep(1.5)
+      while True:
         ## Call Set Manual Value
         set_value_man()
-        break
+        #break
     #
     # Item 4: Randomize Value
     elif choice==str(4):
       print()
       print ('-Randomly Set Value has been selected')
+      time.sleep(1.5)
       ## Call Deploy Template
-      send_value_auto()
+      while True:
+        send_value_auto()
+        break
     #
     # Item 5: Force On
     elif choice==str(5):
       print()
       print ('-Force on has been selected')
+      time.sleep(1.5)
       ## Call Force On
-      send_force_on()
+      while True:
+        send_force_on()
+        break
     #
     # Item 6: Force Off
     elif choice==str(6):
       print()
       print ('-Force off has been selected')
+      time.sleep(1.5)
       ## Call Force Off
-      send_force_off()
+      while True:
+        send_force_off()
+        break
     #     
     # Item 7: Coil Value
     elif choice==str(7):
       print()
       print ('-Send Coil Value has been selected')
+      time.sleep(1.5)
       ## Call Coil Values
-      send_coil_value()
+      while True:
+        send_coil_value()
+        break
     # 
     # Item 8: Coils Value
     elif choice==str(8):
       print()
       print ('-Send Coil Values has been selected')
+      time.sleep(1.5)
       ## Call Force Off
-      send_coils_values()
+      while True:
+        send_coils_values()
+        break
     # 
     # Item 9: Flood Values
     elif choice==str(9):
       print()
       print ('-Flood Values has been selected')
+      time.sleep(1.5)
       ## Call Send Flood Values
-      send_flood_values()
+      while True:
+        send_flood_values()
+        break
     # 
     # Item 10: Exit
     elif choice==str(0):
       print()
-      #print ('-Now exiting...')
-      #print()            
-      loop=False # This will make the while loop to end as not value of loop is set to False
-      clear_screen()
+      print ('-Now exiting...')
+      time.sleep(1.5)           
+      break # This will make the while loop to end as not value of loop is set to False
     else:
       # Any integer inputs other than values 1-5 we print an error message
       print()
       input('Wrong option selection. Enter any key to try again..')
       clear_screen()
     #
-
+#
 if __name__ == "__main__":
   main()
-
+#
 ##############################################################################################
 
 #ChangeLog
