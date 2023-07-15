@@ -18,7 +18,7 @@ ResetColor = "\033[00m"
 #
 # Declare Variables #
 #ipv4address = "192.168.1.20" # Standard Use
-ipv4address = "10.0.3.6" # Local IP for debug testing
+ipv4address = "10.0.2.7" # Local IP for debug testing
 port = "502"
 unitId = "1" #unitId = slave number
 registry = "0"
@@ -87,7 +87,7 @@ def variable_settings_menu():
 #
 ## Set IPv4 address
 def set_ipv4_address():
-  global ipv4address
+  global ipv4address, client
   while True:
     clear_screen()
     information_spash()
@@ -100,6 +100,7 @@ def set_ipv4_address():
         print()
         print('-IPv4 address is now set to '+YellowAscii+ipv4address+ResetColor)
         print()
+        client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
         time.sleep(1.5)
         break
     else:
@@ -110,7 +111,7 @@ def set_ipv4_address():
       print()
 ## Set port
 def set_port():
-  global port
+  global port, client
   while True:
     clear_screen()
     information_spash()
@@ -123,6 +124,7 @@ def set_port():
         print()
         print('-Port number is now set to '+YellowAscii+port+ResetColor)
         print()
+        client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
         time.sleep(1.5)
         break
     else:
