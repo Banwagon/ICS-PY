@@ -17,8 +17,8 @@ BlackAscii = "\033[98m"
 ResetColor = "\033[00m"
 #
 # Declare Variables #
-#ipv4address = "192.168.1.20" # Standard Use
-ipv4address = "10.0.2.7" # Local IP for debug testing
+ipv4address = "192.168.56.101" # Standard Use
+#ipv4address = "10.0.2.7" # Local IP for debug testing
 port = "502"
 unitId = "1" #unitId = slave number
 registry = "0"
@@ -495,6 +495,8 @@ def send_flood_values():
           registry_value_random = randint(1, 99)
           unitId_random = randint(0, (len(unitId_array))-1)
           unitId = unitId_array[unitId_random]
+          if len(unitId_array)==1:
+            unitId_random=unitId_array[0]
           client.write_register(address=int(registry_random), value=int(registry_value_random), slave=int(unitId))
           client.write_coil(address=int(coil_random), value=int(coil_value_random), slave=int(unitId))
           #time.sleep(1)
