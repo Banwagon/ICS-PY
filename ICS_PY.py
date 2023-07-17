@@ -320,7 +320,7 @@ def send_force_off():
       if break_time==30:break
       client.write_register(address=int(registry), value=int(0), slave=int(unitId))
       time.sleep(1.1)
-      print('Value is now '+str(registry_value)+", Ctrl+C to break or wait 30 seconds.")
+      print('Value is now 0, Ctrl+C to break or wait 30 seconds.')
   except KeyboardInterrupt:
     pass
   client.close
@@ -336,7 +336,7 @@ def send_force_on():
       if break_time==30:break
       client.write_register(address=int(registry), value=int(100), slave=int(unitId))
       time.sleep(1.1)
-      print('Value is now '+str(registry_value)+", Ctrl+C to break or wait 30 seconds.")
+      print('Value is now 100, Ctrl+C to break or wait 30 seconds.')
   except KeyboardInterrupt:
     pass
 #
