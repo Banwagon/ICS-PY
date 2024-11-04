@@ -2,8 +2,9 @@
 #
 import sys, time, os
 from random import *
-from pymodbus.client import ModbusTcpClient as ModbusClient
-from pymodbus.exceptions import ConnectionException
+#from pymodbus.client import ModbusTcpClient as ModbusClient
+#from pymodbus.exceptions import ConnectionException
+from pyModbusTCP.client import ModbusClient
 #
 ## Collored Text
 RedAscii = "\033[91m"
