@@ -27,7 +27,7 @@ registry_value = "0"
 coil_value = "0"
 readmin = 0
 readmax = 16
-client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
+client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True, debug=False)
 #
 ## Clear screan
 def clear_screen():
