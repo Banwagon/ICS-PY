@@ -28,7 +28,7 @@ registry_value = "0"
 coil_value = "0"
 readmin = 0
 readmax = 16
-client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True, debug=False)
+client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
 #
 ## Clear screan
 def clear_screen():
@@ -101,7 +101,7 @@ def set_ipv4_address():
         print()
         print('-IPv4 address is now set to '+YellowAscii+ipv4address+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True, debug=False)
+        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
         time.sleep(1.5)
         break
     else:
@@ -125,7 +125,7 @@ def set_port():
         print()
         print('-Port number is now set to '+YellowAscii+port+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True, debug=False)
+        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
         time.sleep(1.5)
         break
     else:
