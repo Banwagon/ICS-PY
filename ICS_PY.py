@@ -265,10 +265,6 @@ def set_value_man():
       print()
       input('Press enter to continue...')
       print()
-  except KeyboardInterrupt:
-    pass
-  clear_screen()
-  client.close
 #
 ## Set value auto
 def send_value_auto():
