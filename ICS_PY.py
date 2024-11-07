@@ -19,7 +19,7 @@ ResetColor = "\033[00m"
 #
 # Declare Variables #
 #ipv4address = "192.168.1.20" # Standard Use
-ipv4address = "10.0.2.7" # Local IP for debug testing
+ipv4address = "192.168.1.20" # Local IP for debug testing
 port = "502"
 unitId = "1" #unitId = slave number
 registry = "0"
@@ -28,7 +28,7 @@ registry_value = "0"
 coil_value = "0"
 readmin = 0
 readmax = 16
-client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+client = ModbusClient(host=str(ipv4address), port=int(port), unit_id=int(unitId), auto_open=True)
 #
 ## Clear screan
 def clear_screen():
@@ -101,7 +101,7 @@ def set_ipv4_address():
         print()
         print('-IPv4 address is now set to '+YellowAscii+ipv4address+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+        client = ModbusClient(host=str(ipv4address), port=int(port), unit_id=int(unitId), auto_open=True)
         time.sleep(1.5)
         break
     else:
@@ -125,7 +125,7 @@ def set_port():
         print()
         print('-Port number is now set to '+YellowAscii+port+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+        client = ModbusClient(host=str(ipv4address), port=int(port), unit_id=int(unitId), auto_open=True)
         time.sleep(1.5)
         break
     else:
@@ -251,11 +251,11 @@ def set_value_man():
         clear_screen()
         print()
         print('Value cannot be greater than '+YellowAscii+'100'+ResetColor)
-        client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
+        client.write_single_register(reg_addr=int(registry), value=int(reg_value))
         print()
         input('Press enter to continue...')
       else:
-        client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
+        client.write_single_register(reg_addr=int(registry), value=int(reg_value))
         print()
         print('Wrote value of '+YellowAscii+str(registry_value)+ResetColor+' to registry ['+CyanAscii+registry+ResetColor+']')
         time.sleep(2)
@@ -265,6 +265,10 @@ def set_value_man():
       print()
       input('Press enter to continue...')
       print()
+  except KeyboardInterrupt:
+    pass
+  clear_screen()
+  client.close
 #
 ## Set value auto
 def send_value_auto():
@@ -293,7 +297,7 @@ def send_value_auto():
     while True:
       random_value = randint(50, 100)
       registry_value = random_value
-      client.write_register(address=int(registry), value=int(registry_value), slave=int(unitId))
+      client.write_single_register(reg_addr=int(registry), value=int(reg_value))
       information_spash()
       print()
       print(RedAscii+48*'-'+ResetColor)
@@ -319,7 +323,7 @@ def send_force_off():
     while True:
       break_time+=1
       if break_time==30:break
-      client.write_register(address=int(registry), value=int(0), slave=int(unitId))
+      client.write_single_register(reg_addr=int(registry), value=int(reg_value))
       time.sleep(1.1)
       print('Value is now 0, Ctrl+C to break or wait 30 seconds.')
   except KeyboardInterrupt:
@@ -335,7 +339,7 @@ def send_force_on():
     while True:
       break_time+=1
       if break_time==30:break
-      client.write_register(address=int(registry), value=int(100), slave=int(unitId))
+      client.write_single_register(reg_addr=int(registry), value=int(reg_value))
       time.sleep(1.1)
       print('Value is now 100, Ctrl+C to break or wait 30 seconds.')
   except KeyboardInterrupt:
@@ -496,8 +500,8 @@ def send_flood_values():
           registry_value_random = randint(1, 99)
           unitId_random = randint(0, (len(unitId_array))-1)
           unitId = unitId_array[unitId_random]
-          client.write_register(address=int(registry_random), value=int(registry_value_random), slave=int(unitId))
-          client.write_coil(address=int(coil_random), value=int(coil_value_random), slave=int(unitId))
+          client.write_single_register(reg_addr=int(registry_random), value=int(reg_value_random))
+          #client.write_coil(address=int(coil_random), value=int(coil_value_random), slave=int(unitId))
           #time.sleep(1)
           time.sleep(float(flood_speed))
           print(str('Wrote value of ['+YellowAscii+str(coil_value_random)+ResetColor+']').ljust(29),str('on coil ['+CyanAscii+str(coil_random)+ResetColor+'] of unit number ['+LightPurpleAscii+unitId+ResetColor+']').rjust(54))
