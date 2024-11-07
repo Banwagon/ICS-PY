@@ -2,9 +2,8 @@
 #
 import sys, time, os
 from random import *
-#from pymodbus.client import ModbusTcpClient as ModbusClient
-#from pymodbus.exceptions import ConnectionException
-from pyModbusTCP.client import ModbusClient
+from pymodbus.client import ModbusTcpClient as ModbusClient
+from pymodbus.exceptions import ConnectionException
 #
 ## Collored Text
 RedAscii = "\033[91m"
@@ -28,7 +27,7 @@ registry_value = "0"
 coil_value = "0"
 readmin = 0
 readmax = 16
-client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
 #
 ## Clear screan
 def clear_screen():
@@ -101,7 +100,7 @@ def set_ipv4_address():
         print()
         print('-IPv4 address is now set to '+YellowAscii+ipv4address+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+        client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
         time.sleep(1.5)
         break
     else:
@@ -125,7 +124,7 @@ def set_port():
         print()
         print('-Port number is now set to '+YellowAscii+port+ResetColor)
         print()
-        client = ModbusClient(host=str(ipv4address), port=int(port), auto_open=True)
+        client = ModbusClient(host=str(ipv4address), port=int(port), autoopen=True, debug=False)
         time.sleep(1.5)
         break
     else:
